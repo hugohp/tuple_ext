@@ -6,145 +6,249 @@ using namespace std;
 
 struct tuple_testing
 {
-  struct Type0 {};
-  struct Type1 {};
-  struct Type2 {};
-  struct Type3 {};
-  struct Type4 {};
+  // Some types
+  struct t0 {};
+  struct t1 {};
+  struct t2 {};
+  struct t3 {};
+  struct t4 {};
 
-  struct head_test {
-    static_assert (is_same<head_t<tuple<Type0>>,Type0>::value);
-    static_assert (is_same<head_t<tuple<Type0,Type1,Type2>>,Type0>::value);
+  struct tuple_cat_tests {
+
+    // concat [[t0,t1],[t2,t3]] = [t0,t1,t2,t3]
+    static_assert (
+      is_same_v<
+        tuple_cat_t<
+          tuple<t0,t1>,
+          tuple<t2,t3>
+        >,
+        tuple<t0,t1,t2,t3>
+      >
+    );
+
+    // concat [[t0,t1],[]] = [t0,t1]
+    static_assert (
+      is_same_v<
+        tuple_cat_t<
+          tuple<t0,t1>,
+          tuple<>
+        >,
+        tuple<t0,t1>
+      >
+    );
+
+    // concat [[],[t0,t1]] = [t0,t1]
+    static_assert (
+      is_same_v<
+        tuple_cat_t<
+          tuple<>,
+          tuple<t0,t1>
+        >,
+        tuple<t0,t1>
+      >
+    );
   };
 
-  struct tail_test {
-    static_assert (is_same<tail_t<tuple<>>,tuple<>>::value);
-    static_assert (is_same<tail_t<tuple<Type0>>,tuple<>>::value);
-    static_assert (is_same<tail_t<tuple<Type0,Type1,Type2>>,tuple<Type1,Type2>>::value);
+
+
+  struct head_tests {
+
+    // head [t0,t1,t2] = t0
+    static_assert (
+      is_same_v<
+        head_t<tuple<t0,t1,t2>>,
+        t0
+        >
+    );
+
+    // head [t0] = t0
+    static_assert (
+      is_same_v<
+        head_t< tuple<t0>>,
+        t0
+      >
+    );
+
   };
 
-  struct has_type_test {
-    static_assert (has_type<Type0,tuple<Type1,Type2,Type0>>::value);
-    static_assert (! has_type<Type0,tuple<Type1,Type2>>::value);
+
+
+  struct tail_tests {
+
+    // tail [t0,t1,t2] = [t1,t2]
+    static_assert (
+      is_same_v<
+       tail_t<tuple<t0,t1,t2>>,
+       tuple<t1,t2>
+      >
+    );
+
+    // tail [t0] = []
+    static_assert (
+      is_same_v<
+       tail_t<tuple<t0>>,
+       tuple<>
+      >
+    );
+
   };
 
-  struct reverse_test {
-    using rtype0 = reverse_t<tuple<>>;
-    static_assert (is_same<rtype0,tuple<>>::value);
 
-    using rtype1 = reverse_t<tuple<Type0>>;
-    static_assert (is_same<rtype1,tuple<Type0>>::value);
 
-    using rtype2 = reverse_t<tuple<Type0,Type1,Type2>>;
-    static_assert (is_same<rtype2,tuple<Type2,Type1,Type0>>::value);
+  struct has_type_tests {
+
+    static_assert ( has_type_v< t0, tuple<t1,t2,t0> > );
+    static_assert ( ! has_type_v< t0 ,tuple<t1,t2> > );
+
   };
 
-  struct distinct_test {
-    using utype0 = distinct_t<tuple<>>;
-    static_assert (is_same<utype0,tuple<>>::value);
 
-    using utype1 = distinct_t<tuple<Type0>>;
-    static_assert (is_same<utype1,tuple<Type0>>::value);
+  struct reverse_tests {
 
-    using utype2 = distinct_t<tuple<Type0,Type1>>;
-    static_assert (is_same<utype2,tuple<Type0,Type1>>::value);
+    // reverse [] = []
+    static_assert (
+      is_same_v<
+        reverse_t<tuple<>>,
+        tuple<>
+      >
+    );
 
-    using utype3 = distinct_t<tuple<Type0,Type1,Type1,Type2,Type0,Type2>>;
-    static_assert (is_same<utype3,tuple<Type0,Type1,Type2>>::value);
+    // reverse [t0] = [t0]
+    static_assert (
+      is_same_v<
+        reverse_t<tuple<t0>>,
+        tuple<t0>
+      > );
+
+    // reverse [t0,t1,t2] = [t2,t1,t0]
+    static_assert (
+      is_same_v<
+       reverse_t<tuple<t0,t1,t2>>,
+       tuple<t2,t1,t0>
+      >
+    );
+
+  };
+
+  struct distinct_tests {
+
+    // distinct [] = []
+    static_assert (
+      is_same_v<
+       distinct_t<tuple<>>,
+       tuple<>
+      >
+    );
+
+    // distinct [t0] = [t0]
+    static_assert (
+      is_same_v<
+        tuple<t0>,
+        tuple<t0>
+      >
+    );
+
+    // distinct [t0,t1] = [t0,t1]
+    static_assert (
+      is_same_v<
+        distinct_t<tuple<t0,t1>>,
+        tuple<t0,t1>
+      >
+    );
+
+    // distinct [t0,t1,t1,t2,t0,t2] = [t0,t1,t2]
+    static_assert (
+      is_same_v<
+        distinct_t<tuple<t0,t1,t1,t2,t0,t2>>,
+        tuple<t0,t1,t2>
+      >
+    );
+
   };
 
   struct remove_test {
-    using rtype0 = remove_t<tuple<>,tuple<>>;
-    static_assert (is_same<rtype0,tuple<>>::value);
 
-    using rtype1 = remove_t<tuple<>,tuple<Type0,Type1>>;
-    static_assert (is_same<rtype1,tuple<Type0,Type1>>::value);
+    // remove [t0,t2] [t0,t1,t2,t3] = [t1,t3]
+    static_assert (
+      is_same_v<
+        remove_t<
+          tuple<t0,t2>,
+          tuple<t0,t1,t2,t3>
+        >,
+        tuple<t1,t3>
+      >
+    );
 
-    using rtype2 = remove_t<tuple<Type0>,tuple<>>;
-    static_assert (is_same<rtype2,tuple<>>::value);
+    // remove [] [t0,t1,t2,t3] = [t0,t1,t2,t3]
+    static_assert (
+      is_same_v<
+        remove_t<
+          tuple<>,
+          tuple<t0,t1,t2,t3>
+        >,
+        tuple<t0,t1,t2,t3>
+      >
+    );
 
-    using rtype3 = remove_t<tuple<Type0,Type1>,tuple<Type0,Type1,Type2,Type3>>;
-    static_assert (is_same<rtype3,tuple<Type2,Type3>>::value);
+    // remove [t0,t1,t2,t3] [] = []
+    static_assert (
+      is_same_v<
+        remove_t<
+          tuple<t0,t1,t2,t3>,
+          tuple<>
+        >,
+        tuple<>
+      >
+    );
 
-    using rtype4 = remove_t<tuple<Type0,Type1>,tuple<Type0,Type2,Type3>>;
-    static_assert (is_same<rtype4,tuple<Type2,Type3>>::value);
+    // remove [] [] = []
+    static_assert (
+      is_same_v<
+        remove_t<
+          tuple<>,
+          tuple<>
+        >,
+        tuple<>
+      >
+    );
 
-    using rtype5 = remove_t<tuple<Type0,Type1>,tuple<Type0,Type0,Type1>>;
-    static_assert (is_same<rtype5,tuple<>>::value);
-
-  };
-
-  struct append_test {
-    using atype0 = append_t<tuple<>,tuple<>>;
-    static_assert (is_same<atype0,tuple<>>::value);
-
-    using atype1 = append_t<tuple<>,tuple<Type0,Type1>>;
-    static_assert (is_same<atype1,tuple<Type0,Type1>>::value);
-
-    using atype2 = append_t<tuple<Type0>,tuple<>>;
-    static_assert (is_same<atype2,tuple<Type0>>::value);
-
-    using atype3 = append_t<tuple<Type0,Type3>,tuple<Type0,Type1>>;
-    static_assert (is_same<atype3,tuple<Type0,Type1,Type0,Type3>>::value);
-
-  };
-
-  struct prepend_test {
-    using atype0 = prepend_t<tuple<>,tuple<>>;
-    static_assert (is_same<atype0,tuple<>>::value);
-
-    using atype1 = prepend_t<tuple<>,tuple<Type0,Type1>>;
-    static_assert (is_same<atype1,tuple<Type0,Type1>>::value);
-
-    using atype2 = prepend_t<tuple<Type0>,tuple<>>;
-    static_assert (is_same<atype2,tuple<Type0>>::value);
-
-    using atype3 = prepend_t<tuple<Type0,Type3>,tuple<Type0,Type1>>;
-    static_assert (is_same<atype3,tuple<Type0,Type3,Type0,Type1>>::value);
   };
 
   struct inter_test {
-    using itype0 = inter_t<tuple<>,tuple<>>;
-    static_assert (is_same<itype0,tuple<>>::value);
 
-    using itype1 = inter_t<tuple<>,tuple<Type0,Type1>>;
-    static_assert (is_same<itype1,tuple<>>::value);
+    // inter [t0,t1,t2,t3] [t0,t1] = [t0,t1]
+    static_assert (
+      is_same_v<
+        inter_t<
+          tuple<t0,t1,t2,t3>,
+          tuple<t0,t1>
+        >,
+        tuple<t0,t1>
+      >
+    );
 
-    using itype2 = inter_t<tuple<Type0>,tuple<>>;
-    static_assert (is_same<itype2,tuple<>>::value);
+    // inter [t0,t1] [t2,t3] = []
+    static_assert (
+      is_same_v<
+        inter_t<
+          tuple<t0,t1>,
+          tuple<t2,t3>
+        >,
+        tuple<>
+      >
+    );
 
-    using itype3 = inter_t<tuple<Type0,Type3>,tuple<Type0,Type1>>;
-    static_assert (is_same<itype3,tuple<Type0>>::value);
+    // inter [] [] = []
+    static_assert (
+      is_same_v<
+        inter_t<
+          tuple<>,
+          tuple<>
+        >,
+        tuple<>
+      >
+    );
 
-    using itype4 = inter_t<tuple<Type0,Type0>,tuple<Type0,Type1>>;
-    static_assert (is_same<itype4,tuple<Type0>>::value);
-
-  };
-
-  struct union_test {
-    using utype0 = union_t<tuple<>,tuple<>>;
-    static_assert (is_same<utype0,tuple<>>::value);
-
-    using utype1 = union_t<tuple<>,tuple<Type0,Type1>>;
-    static_assert (is_same<utype1,tuple<Type0,Type1>>::value);
-
-    using utype2 = union_t<tuple<Type0>,tuple<>>;
-    static_assert (is_same<utype2,tuple<Type0>>::value);
-
-    using utype3 = union_t<tuple<Type0,Type3>,tuple<Type0,Type1>>;
-    static_assert (is_same<utype3,tuple<Type0,Type3,Type1>>::value);
-
-  };
-
-  struct select_test {
-    using stype0 = select_t<tuple<>,tuple<>>;
-    static_assert (is_same<stype0,tuple<>>::value);
-
-    using stype1 = select_t<tuple<>,tuple<Type0,Type1>>;
-    static_assert (is_same<stype1,tuple<>>::value);
-
-    using stype3 = select_t<tuple<Type0,Type1>,tuple<Type0,Type1,Type3>>;
-    static_assert (is_same<stype3,tuple<Type0,Type1>>::value);
   };
 };
 

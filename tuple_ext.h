@@ -10,6 +10,7 @@ namespace impl
   template<typename T>
   struct false_type : std::false_type {};
 }
+
 // ==================================== tuple_cat_t =================================
 
 template<typename...Ts>
@@ -103,6 +104,9 @@ struct has_type<T,std::tuple<Ts...>>
 {
   static constexpr bool value = impl::has_type<T,Ts...>::value;
 };
+
+template<typename T,typename Tp>
+inline constexpr bool has_type_v = has_type<T, Tp>::value;
 
 // ==================================== reverse / reverse_t =================================
 namespace impl
@@ -236,45 +240,6 @@ struct remove<std::tuple<T1s...>,std::tuple<T2s...>>
 template<typename Tp1,typename Tp2> 
 using remove_t = typename remove<Tp1,Tp2>::type;
 
-// ==================================== append / append_t =================================
-
-namespace impl
-{
-  template<typename... T1s>
-  struct append
-  {
-    template<typename... T2s>
-    struct to
-    {
-      using type = tuple_cat_t<std::tuple<T2s>...,std::tuple<T1s>...>;
-    };
-  
-  };
-} // namespace impl
-
-
-template<typename Tp1,typename Tp2> struct append;
-
-template<typename Tp1,typename Tp2>
-struct append
-{
-  static_assert (impl::false_type<Tp1>::value,"tuple_ext: append only takes tuples as template parameters");
-};
-
-template<typename... T1s,typename... T2s>
-struct append<std::tuple<T1s...>,std::tuple<T2s...>>
-{
-  using type = typename impl::append<T1s...>::to<T2s...>::type;
-};
-
-template<typename Tp1,typename Tp2>
-using append_t = typename append<Tp1,Tp2>::type;
-
-// ==================================== prepend_t =================================
-
-template<typename Tp1,typename Tp2>
-using prepend_t = typename append<Tp2,Tp1>::type;
-
 // ==================================== inter / inter_t =================================
 
 namespace impl
@@ -313,51 +278,6 @@ struct inter<std::tuple<T1s...>,std::tuple<T2s...>>
 
 template<typename Tp1,typename Tp2>
 using inter_t = typename inter<Tp1,Tp2>::type;
-
-// ==================================== union / union_t =================================
-
-template<typename Tp1,typename Tp2>
-using union_t = distinct_t<append_t<Tp2,Tp1>>;
-
-// ==================================== select / select_t =================================
-
-namespace impl
-{
-  template<typename ... T1s>
-  struct select
-  {
-    template<typename... T2s>
-    requires ( has_type<T1s,T2s...>::value && ... )
-    struct from
-    {
-      using type = tuple_cat_t<
-        typename std::conditional<
-          has_type<T1s,T2s...>::value,
-          std::tuple<T1s>,
-          std::tuple<>
-        >::type...
-      >;
-    };
-  
-  };
-} 
-
-template<typename Tp1,typename Tp2> struct select;
-
-template<typename Tp1,typename Tp2>
-struct select
-{
-  static_assert (impl::false_type<Tp1>::value,"tuple_ext: select only takes tuples as template parameters");
-};
-
-template<typename... T1s,typename... T2s>
-struct select<std::tuple<T1s...>,std::tuple<T2s...>>
-{
-  using type = typename impl::select<T1s...>::from<T2s...>::type;
-};
-
-template<typename Tp1,typename Tp2>
-using select_t = typename select<Tp1,Tp2>::type;
 
 } // namespace tuple_ext
 
