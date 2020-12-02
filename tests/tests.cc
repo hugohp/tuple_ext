@@ -18,7 +18,7 @@ struct tuple_testing
     // concat [[t0,t1],[t2,t3]] = [t0,t1,t2,t3]
     static_assert (
       is_same_v<
-        tuple_cat_t<
+        concat_t<
           tuple<t0,t1>,
           tuple<t2,t3>
         >,
@@ -29,7 +29,7 @@ struct tuple_testing
     // concat [[t0,t1],[]] = [t0,t1]
     static_assert (
       is_same_v<
-        tuple_cat_t<
+        concat_t<
           tuple<t0,t1>,
           tuple<>
         >,
@@ -40,7 +40,7 @@ struct tuple_testing
     // concat [[],[t0,t1]] = [t0,t1]
     static_assert (
       is_same_v<
-        tuple_cat_t<
+        concat_t<
           tuple<>,
           tuple<t0,t1>
         >,

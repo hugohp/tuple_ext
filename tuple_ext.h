@@ -11,10 +11,10 @@ namespace impl
   struct false_type : std::false_type {};
 }
 
-// ==================================== tuple_cat_t =================================
+// ==================================== concat_t =================================
 
 template<typename...Ts>
-using tuple_cat_t = decltype(std::tuple_cat(std::declval<Ts>()...));
+using concat_t = decltype(std::tuple_cat(std::declval<Ts>()...));
 
 // ==================================== head / head_t =================================
 
@@ -119,7 +119,7 @@ namespace impl
   template<typename T,typename... Ts>
   struct reverse<T,Ts...> : reverse<Ts...>
   {
-    using type = tuple_cat_t<typename reverse<Ts...>::type, std::tuple<T>>;
+    using type = concat_t<typename reverse<Ts...>::type, std::tuple<T>>;
   };
 }
   
@@ -158,7 +158,7 @@ namespace impl
      typename std::conditional_t<
        has_type<T,Ts...>::value,
        typename last_distinct<Ts...>::type,
-       tuple_cat_t<std::tuple<T>,typename last_distinct<Ts...>::type> 
+       concat_t<std::tuple<T>,typename last_distinct<Ts...>::type> 
      >;
   };
 
@@ -211,7 +211,7 @@ namespace impl
     template<typename... T2s>
     struct from
     {
-      using type = tuple_cat_t<
+      using type = concat_t<
         typename std::conditional<
           has_type<T2s,T1s...>::value,
           std::tuple<>,
@@ -250,7 +250,7 @@ namespace impl
     template<typename... T2s>
     struct with
     {
-      using type = tuple_cat_t<
+      using type = concat_t<
         typename std::conditional<
           has_type<T1s,T2s...>::value,
           std::tuple<T1s>,
