@@ -184,22 +184,8 @@ struct zip
 
 
 // *********************
-// *       unzip       *
+// *       fst         *
 // *********************
-// is_pair_v / are_pairs_v
-template<typename T>
-struct is_pair : std::false_type {};
-
-template<typename T1, typename T2>
-struct is_pair<std::pair<T1,T2>> : std::true_type {};
-
-template<typename T>
-inline constexpr bool is_pair_v = is_pair<T>::value;
-
-template<typename... Ts>
-inline constexpr bool are_pairs_v = ( is_pair<Ts>::value && ... );
-
-// fst_t: fst (a,b) = a
 template<typename T> struct fst;
 
 template<typename T1,typename T2>
@@ -208,10 +194,10 @@ struct fst<std::pair<T1,T2>>
   using type = T1;
 };
 
-template<typename T>
-using fst_t = typename fst<T>::type;
 
-// snd_t: snd (a,b) = b
+// *********************
+// *       snd         *
+// *********************
 template<typename T> struct snd;
 
 template<typename T1,typename T2>
@@ -220,19 +206,18 @@ struct snd<std::pair<T1,T2>>
   using type = T2;
 };
 
-template<typename T>
-using snd_t = typename snd<T>::type;
 
-// unzip
-
+// *********************
+// *      unzip        *
+// *********************
 template<typename T> struct unzip;
 
 template<typename... Ts>
 struct unzip<std::tuple<Ts...>>
 {
   using type = std::pair<
-    std::tuple<fst_t<Ts>...>,
-    std::tuple<snd_t<Ts>...>
+    std::tuple<typename fst<Ts>::type...>,
+    std::tuple<typename snd<Ts>::type...>
   >;
 };
 

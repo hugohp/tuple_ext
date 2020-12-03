@@ -86,6 +86,16 @@ using inter_t = typename inter<T1,T2>::type;
 
 
 // *********************
+// *  fst_t and snd_t  *
+// *********************
+template<typename T>
+using fst_t = typename impl::fst<T>::type;
+
+template<typename T>
+using snd_t = typename impl::snd<T>::type;
+
+
+// *********************
 // *      zip_t        *
 // *********************
 template<typename T1,typename T2> struct zip;
