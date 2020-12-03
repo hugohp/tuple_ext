@@ -15,7 +15,7 @@ struct tuple_testing
 
   struct tuple_cat_tests {
 
-    // concat [[t0,t1],[t2,t3]] = [t0,t1,t2,t3]
+    // concat [t0,t1] [t2,t3] = [t0,t1,t2,t3]
     static_assert (
       is_same_v<
         concat_t<
@@ -26,7 +26,7 @@ struct tuple_testing
       >
     );
 
-    // concat [[t0,t1],[]] = [t0,t1]
+    // concat [t0,t1] [] = [t0,t1]
     static_assert (
       is_same_v<
         concat_t<
@@ -37,7 +37,7 @@ struct tuple_testing
       >
     );
 
-    // concat [[],[t0,t1]] = [t0,t1]
+    // concat [] [t0,t1] = [t0,t1]
     static_assert (
       is_same_v<
         concat_t<
@@ -105,11 +105,11 @@ struct tuple_testing
 
   struct reverse_tests {
 
-    // reverse [] = []
+    // reverse [t0,t1,t2] = [t2,t1,t0]
     static_assert (
       is_same_v<
-        reverse_t<tuple<>>,
-        tuple<>
+       reverse_t<tuple<t0,t1,t2>>,
+       tuple<t2,t1,t0>
       >
     );
 
@@ -120,17 +120,33 @@ struct tuple_testing
         tuple<t0>
       > );
 
-    // reverse [t0,t1,t2] = [t2,t1,t0]
+    // reverse [] = []
     static_assert (
       is_same_v<
-       reverse_t<tuple<t0,t1,t2>>,
-       tuple<t2,t1,t0>
+        reverse_t<tuple<>>,
+        tuple<>
       >
     );
 
   };
 
   struct distinct_tests {
+
+    // distinct [t0,t1,t1,t2,t0,t2] = [t0,t1,t2]
+    static_assert (
+      is_same_v<
+        distinct_t<tuple<t0,t1,t1,t2,t0,t2>>,
+        tuple<t0,t1,t2>
+      >
+    );
+
+    // distinct [t0,t1] = [t0,t1]
+    static_assert (
+      is_same_v<
+        distinct_t<tuple<t0,t1>>,
+        tuple<t0,t1>
+      >
+    );
 
     // distinct [] = []
     static_assert (
@@ -145,22 +161,6 @@ struct tuple_testing
       is_same_v<
         tuple<t0>,
         tuple<t0>
-      >
-    );
-
-    // distinct [t0,t1] = [t0,t1]
-    static_assert (
-      is_same_v<
-        distinct_t<tuple<t0,t1>>,
-        tuple<t0,t1>
-      >
-    );
-
-    // distinct [t0,t1,t1,t2,t0,t2] = [t0,t1,t2]
-    static_assert (
-      is_same_v<
-        distinct_t<tuple<t0,t1,t1,t2,t0,t2>>,
-        tuple<t0,t1,t2>
       >
     );
 
@@ -233,6 +233,28 @@ struct tuple_testing
         inter_t<
           tuple<t0,t1>,
           tuple<t2,t3>
+        >,
+        tuple<>
+      >
+    );
+
+    // inter [t0,t1] [] = []
+    static_assert (
+      is_same_v<
+        inter_t<
+          tuple<t0,t1>,
+          tuple<>
+        >,
+        tuple<>
+      >
+    );
+
+    // inter [] [t0,t1] = []
+    static_assert (
+      is_same_v<
+        inter_t<
+          tuple<>,
+          tuple<t0,t1>
         >,
         tuple<>
       >

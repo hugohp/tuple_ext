@@ -11,12 +11,16 @@ namespace impl
   struct false_type : std::false_type {};
 }
 
-// ==================================== concat_t =================================
+// *********************
+// *     concat_t      *
+// *********************
 
 template<typename...Ts>
 using concat_t = decltype(std::tuple_cat(std::declval<Ts>()...));
 
-// ==================================== head / head_t =================================
+// *********************
+// *       head_t      *
+// *********************
 
 namespace impl
 {
@@ -46,7 +50,9 @@ struct head<std::tuple<Ts...>>
 template<typename Tp> 
 using head_t = typename head<Tp>::type;
 
-// ==================================== tail / tail_t =================================
+// *********************
+// *     tail_t      *
+// *********************
 
 namespace impl
 {
@@ -80,7 +86,9 @@ struct tail<std::tuple<Ts...>>
 template<typename Tp> 
 using tail_t = typename tail<Tp>::type;
 
-// ==================================== has_type =================================
+// *********************
+// *    has_type_t     *
+// *********************
 
 namespace impl
 {
@@ -108,7 +116,9 @@ struct has_type<T,std::tuple<Ts...>>
 template<typename T,typename Tp>
 inline constexpr bool has_type_v = has_type<T, Tp>::value;
 
-// ==================================== reverse / reverse_t =================================
+// *********************
+// *    reverse_t      *
+// *********************
 namespace impl
 {
   template<typename... Ts>
@@ -141,7 +151,9 @@ struct reverse<std::tuple<Ts...>>
 template<typename Tp> 
 using reverse_t = typename reverse<Tp>::type;
 
-// ==================================== distinct / distinct_t =================================
+// *********************
+// *    distinct_t     *
+// *********************
 
 namespace impl
 {
@@ -182,7 +194,6 @@ namespace impl
   
 }
 
-// Distinct items of a list in the order of the first occurence.
 template<typename Tp> struct distinct;
 
 template<typename T>
@@ -200,9 +211,9 @@ template<typename Tp>
 using distinct_t = typename distinct<Tp>::type;
 
 
-// ==================================== remove_type / remove_type_t  =================================
-
-
+// *********************
+// *    remove_t     *
+// *********************
 namespace impl
 {
   template<typename ... T1s>
@@ -240,8 +251,9 @@ struct remove<std::tuple<T1s...>,std::tuple<T2s...>>
 template<typename Tp1,typename Tp2> 
 using remove_t = typename remove<Tp1,Tp2>::type;
 
-// ==================================== inter / inter_t =================================
-
+// *********************
+// *      inter_t      *
+// *********************
 namespace impl
 {
   template<typename ... T1s>
