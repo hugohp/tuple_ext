@@ -12,6 +12,8 @@ struct tuple_testing
   struct t2 {};
   struct t3 {};
   struct t4 {};
+  struct t5 {};
+  struct t6 {};
 
   struct tuple_cat_tests {
 
@@ -64,7 +66,7 @@ struct tuple_testing
     // head [t0] = t0
     static_assert (
       is_same_v<
-        head_t< tuple<t0>>,
+        head_t<tuple<t0>>,
         t0
       >
     );
@@ -99,6 +101,7 @@ struct tuple_testing
 
     static_assert ( has_type_v< t0, tuple<t1,t2,t0> > );
     static_assert ( ! has_type_v< t0 ,tuple<t1,t2> > );
+    static_assert ( ! has_type_v< t0 ,tuple<> > );
 
   };
 
@@ -130,33 +133,33 @@ struct tuple_testing
 
   };
 
-  struct distinct_tests {
+  struct unique_tests {
 
-    // distinct [t0,t1,t1,t2,t0,t2] = [t0,t1,t2]
+    // unique [t0,t1,t1,t2,t0,t2] = [t0,t1,t2]
     static_assert (
       is_same_v<
-        distinct_t<tuple<t0,t1,t1,t2,t0,t2>>,
+        unique_t<tuple<t0,t1,t1,t2,t0,t2>>,
         tuple<t0,t1,t2>
       >
     );
 
-    // distinct [t0,t1] = [t0,t1]
+    // unique [t0,t1] = [t0,t1]
     static_assert (
       is_same_v<
-        distinct_t<tuple<t0,t1>>,
+        unique_t<tuple<t0,t1>>,
         tuple<t0,t1>
       >
     );
 
-    // distinct [] = []
+    // unique [] = []
     static_assert (
       is_same_v<
-       distinct_t<tuple<>>,
+       unique_t<tuple<>>,
        tuple<>
       >
     );
 
-    // distinct [t0] = [t0]
+    // unique [t0] = [t0]
     static_assert (
       is_same_v<
         tuple<t0>,
@@ -270,7 +273,6 @@ struct tuple_testing
         tuple<>
       >
     );
-
   };
 };
 

@@ -24,31 +24,30 @@ using concat_t = decltype(std::tuple_cat(std::declval<Ts>()...));
 
 namespace impl
 {
-  template<typename... Ts> struct head {};
-  
+  template<typename Tp> struct head;
+
+  template<typename T>
+  struct head
+  {
+    static_assert (impl::false_type<T>::value,"tuple_ext: head only takes tuple as template parameter");
+  };
+
+  template<typename... Ts>
+  struct head<std::tuple<Ts...>>
+  {
+    static_assert (impl::false_type<Ts...>::value,"tuple_ext: head cannot take empty tuple");
+  };
+
+
   template<typename T,typename... Ts>
-  struct head<T,Ts...>
+  struct head<std::tuple<T,Ts...>>
   {
     using type = T;
   };
 } // namespace impl
 
-template<typename Tp> struct head;
-
-template<typename T>
-struct head
-{
-  static_assert (impl::false_type<T>::value,"tuple_functions: head only takes tuple as template parameter");
-};
-
-template<typename... Ts>
-struct head<std::tuple<Ts...>>
-{
-  using type = typename impl::head<Ts...>::type;
-};
-
 template<typename Tp> 
-using head_t = typename head<Tp>::type;
+using head_t = typename impl::head<Tp>::type;
 
 // *********************
 // *     tail_t      *
@@ -56,35 +55,30 @@ using head_t = typename head<Tp>::type;
 
 namespace impl
 {
-  template<typename... Ts>
+  template<typename Tp> struct tail;
+
+  template<typename T>
   struct tail
   {
-    using type = std::tuple<>;
+    static_assert (impl::false_type<T>::value,"tuple_ext: tail only takes tuple as template parameter");
   };
-  
+
+  template<typename... Ts>
+  struct tail<std::tuple<Ts...>>
+  {
+    static_assert (impl::false_type<Ts...>::value,"tuple_ext: tail cannot take empty tuple");
+  };
+
   template<typename T,typename... Ts>
-  struct tail<T,Ts...>
+  struct tail<std::tuple<T,Ts...>>
   {
     using type = std::tuple<Ts...>;
   };
 } // namespace impl
 
-template<typename Tp> struct tail;
-
-template<typename T>
-struct tail
-{
-  static_assert (impl::false_type<T>::value,"tuple_ext: tail only takes tuple as template parameter");
-};
-
-template<typename... Ts>
-struct tail<std::tuple<Ts...>>
-{
-  using type = typename impl::tail<Ts...>::type;
-};
 
 template<typename Tp> 
-using tail_t = typename tail<Tp>::type;
+using tail_t = typename impl::tail<Tp>::type;
 
 // *********************
 // *    has_type_t     *
@@ -122,17 +116,18 @@ inline constexpr bool has_type_v = has_type<T, Tp>::value;
 namespace impl
 {
   template<typename... Ts>
-  struct reverse{
+  struct reverse
+  {
     using type = std::tuple<>;
   };
-  
+
   template<typename T,typename... Ts>
-  struct reverse<T,Ts...> : reverse<Ts...>
+  struct reverse<T,Ts...>
   {
     using type = concat_t<typename reverse<Ts...>::type, std::tuple<T>>;
   };
 }
-  
+
 template<typename Tp> struct reverse;
 
 template<typename T>
@@ -140,7 +135,7 @@ struct reverse
 {
   static_assert (impl::false_type<T>::value,"tuple_ext: reverse only takes tuple as template parameter");
 };
-  
+
 template<typename... Ts>
 struct reverse<std::tuple<Ts...>>
 {
@@ -152,63 +147,61 @@ template<typename Tp>
 using reverse_t = typename reverse<Tp>::type;
 
 // *********************
-// *    distinct_t     *
+// *    unique_t     *
 // *********************
 
 namespace impl
 {
-  // Distinct items of a list in the order of the last occurence.
-  template<typename ...Ts>
-  struct last_distinct {
+  template<typename Tp> struct runique;
+
+  template<typename... Ts>
+  struct runique<std::tuple<Ts...>>
+  {
     using type = std::tuple<Ts...>;
   };
-  
+
   template<typename T,typename... Ts>
-  struct last_distinct<T,Ts...>{
- 
-    using type = 
-     typename std::conditional_t<
-       has_type<T,Ts...>::value,
-       typename last_distinct<Ts...>::type,
-       concat_t<std::tuple<T>,typename last_distinct<Ts...>::type> 
-     >;
+  struct runique<std::tuple<T,Ts...>>
+  {
+    using type = concat_t<
+      std::conditional_t<
+        impl::has_type<T,Ts...>::value,
+        std::tuple<>,
+        std::tuple<T>
+      >,
+      typename runique<std::tuple<Ts...>>::type
+    >;
   };
 
-  template<typename Tp> struct last_distinct_tp;
+  template<typename Tp> struct unique;
 
   template<typename... Ts>
-  struct last_distinct_tp<std::tuple<Ts...>>{
-    using type = typename last_distinct<Ts...>::type;
+  struct unique<std::tuple<Ts...>>
+  {
+    using type = reverse_t<
+      typename impl::runique <
+        typename impl::reverse<Ts...>::type
+      >::type
+    >;
   };
+} // namespace impl
 
-
-  template<typename... Ts>
-  struct distinct{
-    using type = reverse_t 
-        <
-          typename impl::last_distinct_tp <
-            typename impl::reverse<Ts...>::type
-          >::type
-        >;
-  };
-  
-}
-
-template<typename Tp> struct distinct;
+template<typename Tp> struct unique;
 
 template<typename T>
-struct distinct
+struct unique
 {
-  static_assert (impl::false_type<T>::value,"tuple_ext: distinct only takes tuple as template parameter");
+  static_assert (impl::false_type<T>::value,"tuple_ext: unique only takes tuple as template parameter");
 };
 
-template<typename ...Ts>
-struct distinct<std::tuple<Ts...>>
+template<typename... Ts>
+struct unique<std::tuple<Ts...>>
 {
-  using type = typename impl::distinct<Ts...>::type;
+  using type = typename impl::unique<Ts...>::type;
 };
+
 template<typename Tp> 
-using distinct_t = typename distinct<Tp>::type;
+using unique_t = typename impl::unique<Tp>::type;
 
 
 // *********************
@@ -224,13 +217,13 @@ namespace impl
     {
       using type = concat_t<
         typename std::conditional<
-          has_type<T2s,T1s...>::value,
+          impl::has_type<T2s,T1s...>::value,
           std::tuple<>,
           std::tuple<T2s>
         >::type...
       >;
     };
-  
+
   };
 } // namespace impl
 
@@ -264,13 +257,13 @@ namespace impl
     {
       using type = concat_t<
         typename std::conditional<
-          has_type<T1s,T2s...>::value,
+          impl::has_type<T1s,T2s...>::value,
           std::tuple<T1s>,
           std::tuple<>
         >::type...
       >;
     };
-  
+
   };
 } 
 
@@ -285,11 +278,10 @@ struct inter
 template<typename... T1s,typename... T2s>
 struct inter<std::tuple<T1s...>,std::tuple<T2s...>>
 {
-  using type = distinct_t<typename impl::inter<T1s...>::with<T2s...>::type>;
+  using type = unique_t<typename impl::inter<T1s...>::with<T2s...>::type>;
 };
 
 template<typename Tp1,typename Tp2>
 using inter_t = typename inter<Tp1,Tp2>::type;
 
 } // namespace tuple_ext
-
