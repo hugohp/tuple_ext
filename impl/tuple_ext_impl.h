@@ -1,0 +1,249 @@
+#pragma once
+#include <type_traits>
+#include <tuple>
+
+namespace tuple_ext
+{
+
+namespace impl
+{
+  template<typename T>
+  struct is_tuple : std::false_type {};
+  
+  template<typename... Ts>
+  struct is_tuple<std::tuple<Ts...>> : std::true_type {};
+}
+
+// *********************
+// *     concepts      *
+// *********************
+template<typename T>
+concept is_tuple = impl::is_tuple<T>::value;
+
+template<typename... Ts>
+concept are_tuple = ( is_tuple<Ts> && ... );
+
+// *********************
+// *     concat_t      *
+// *********************
+
+template<typename...Ts>
+requires ( are_tuple<Ts...> )
+using concat_t = decltype(std::tuple_cat(std::declval<Ts>()...));
+
+namespace impl
+{
+
+// *********************
+// *        head       *
+// *********************
+
+template<typename T> struct head;
+
+template<typename T,typename... Ts>
+struct head<std::tuple<T,Ts...>>
+{
+  using type = T;
+};
+
+// *********************
+// *       tail        *
+// *********************
+
+
+template<typename T> struct tail;
+
+template<typename T,typename... Ts>
+struct tail<std::tuple<T,Ts...>>
+{
+  using type = std::tuple<Ts...>;
+};
+
+
+// *********************
+// *     has_type      *
+// *********************
+
+
+template<typename T, typename... Ts>
+struct has_type
+{
+  static constexpr bool value = (std::is_same<T,Ts>::value || ...);
+};
+
+
+// *********************
+// *     reverse       *
+// *********************
+
+template<typename T> struct reverse;
+
+template<typename... Ts>
+struct reverse<std::tuple<Ts...>>
+{
+  using type = std::tuple<>;
+};
+
+template<typename T,typename... Ts>
+struct reverse<std::tuple<T,Ts...>>
+{
+  using type = concat_t<typename reverse<std::tuple<Ts...>>::type, std::tuple<T>>;
+};
+
+// *********************
+// *       unique      *
+// *********************
+
+
+template<typename T> struct runique;
+
+template<typename... Ts>
+struct runique<std::tuple<Ts...>>
+{
+  using type = std::tuple<Ts...>;
+};
+
+template<typename T,typename... Ts>
+struct runique<std::tuple<T,Ts...>>
+{
+  using type = concat_t<
+    std::conditional_t<
+      impl::has_type<T,Ts...>::value,
+      std::tuple<>,
+      std::tuple<T>
+    >,
+    typename runique<std::tuple<Ts...>>::type
+  >;
+};
+
+template<typename T> struct unique;
+
+template<typename... Ts>
+struct unique<std::tuple<Ts...>>
+{
+  using type = typename reverse<
+    typename impl::runique <
+      typename impl::reverse<std::tuple<Ts...>>::type
+    >::type
+  >::type;
+};
+
+
+// *********************
+// *     remove        *
+// *********************
+
+template<typename ... T1s>
+struct remove
+{
+  template<typename... T2s>
+  struct from
+  {
+    using type = concat_t<
+      typename std::conditional<
+        impl::has_type<T2s,T1s...>::value,
+        std::tuple<>,
+        std::tuple<T2s>
+      >::type...
+    >;
+  };
+
+};
+
+
+// *********************
+// *       inter       *
+// *********************
+
+template<typename ... T1s>
+struct inter
+{
+  template<typename... T2s>
+  struct with
+  {
+    using type = concat_t<
+      typename std::conditional<
+        impl::has_type<T1s,T2s...>::value,
+        std::tuple<T1s>,
+        std::tuple<>
+      >::type...
+    >;
+  };
+
+};
+
+
+// *********************
+// *       zip         *
+// *********************
+
+template<typename ... T1s>
+struct zip
+{
+  template<typename... T2s>
+  struct with
+  {
+    using type = std::tuple<
+      std::pair<T1s,T2s>...
+    >;
+  };
+};
+
+
+// *********************
+// *       unzip       *
+// *********************
+
+// is_pair_v / are_pairs_v
+template<typename T>
+struct is_pair : std::false_type {};
+
+template<typename T1, typename T2>
+struct is_pair<std::pair<T1,T2>> : std::true_type {};
+
+template<typename T>
+inline constexpr bool is_pair_v = is_pair<T>::value;
+
+template<typename... Ts>
+inline constexpr bool are_pairs_v = ( is_pair<Ts>::value && ... );
+
+// fst_t: fst (a,b) = a
+template<typename T> struct fst;
+
+template<typename T1,typename T2>
+struct fst<std::pair<T1,T2>>
+{
+  using type = T1;
+};
+
+template<typename T>
+using fst_t = typename fst<T>::type;
+
+// snd_t: snd (a,b) = b
+template<typename T> struct snd;
+
+template<typename T1,typename T2>
+struct snd<std::pair<T1,T2>>
+{
+  using type = T2;
+};
+
+template<typename T>
+using snd_t = typename snd<T>::type;
+
+// unzip
+
+template<typename T> struct unzip;
+
+template<typename... Ts>
+struct unzip<std::tuple<Ts...>>
+{
+  using type = std::pair<
+    std::tuple<fst_t<Ts>...>,
+    std::tuple<snd_t<Ts>...>
+  >;
+};
+
+
+} // namespace impl
+} // namespace tuple_ext
