@@ -221,6 +221,17 @@ struct unzip<std::tuple<Ts...>>
   >;
 };
 
+// *********************
+// *       map         *
+// *********************
+template<template<typename T> typename F, typename Tp> struct map;
+
+template<template<typename T> typename F, typename... Ts>
+struct map<F,std::tuple<Ts...>>
+{
+  using type = std::tuple<typename F<Ts>::type...>;
+};
+
 
 } // namespace impl
 } // namespace tuple_ext

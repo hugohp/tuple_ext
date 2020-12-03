@@ -118,4 +118,13 @@ template<typename T>
 requires ( is_tuple<T> )
 using unzip_t = typename impl::unzip<T>::type;
 
+
+// *********************
+// *      map_t        *
+// *********************
+template<template<typename T> typename F, typename Tp>
+requires ( is_tuple<Tp> )
+using map_t = typename impl::map<F,Tp>::type;
+
+
 } // namespace tuple_ext
