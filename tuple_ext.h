@@ -12,18 +12,18 @@ template<typename T>
 requires ( is_tuple<T> && (std::tuple_size_v<T> != 0) )
 using head_t = typename impl::head<T>::type;
 
+
 // *********************
 // *     tail_t      *
 // *********************
-
 template<typename T>
 requires is_tuple<T>
 using tail_t = typename impl::tail<T>::type;
 
+
 // *********************
 // *    has_type_t     *
 // *********************
-
 template<typename T,typename Tp> struct has_type;
 
 template<typename T,typename... Ts>
@@ -36,18 +36,18 @@ template<typename T,typename Tp>
 requires ( is_tuple<Tp> )
 inline constexpr bool has_type_v = has_type<T, Tp>::value;
 
+
 // *********************
 // *    reverse_t      *
 // *********************
-
 template<typename T>
 requires ( is_tuple<T> )
 using reverse_t = typename impl::reverse<T>::type;
 
+
 // *********************
 // *    unique_t     *
 // *********************
-
 template<typename T>
 requires ( is_tuple<T> )
 using unique_t = typename impl::unique<T>::type;
@@ -56,7 +56,6 @@ using unique_t = typename impl::unique<T>::type;
 // *********************
 // *    remove_t     *
 // *********************
-
 template<typename T1,typename T2> struct remove;
 
 template<typename ...T1s,typename... T2s>
@@ -69,10 +68,10 @@ template<typename T1,typename T2>
 requires ( is_tuple<T1> && is_tuple<T2> )
 using remove_t = typename remove<T1,T2>::type;
 
+
 // *********************
 // *      inter_t      *
 // *********************
-
 template<typename T1,typename T2> struct inter;
 
 template<typename... T1s,typename... T2s>
@@ -85,10 +84,10 @@ template<typename T1,typename T2>
 requires ( is_tuple<T1> && is_tuple<T2> )
 using inter_t = typename inter<T1,T2>::type;
 
+
 // *********************
 // *      zip_t        *
 // *********************
-
 template<typename T1,typename T2> struct zip;
 
 template<typename... T1s,typename... T2s>
@@ -105,10 +104,8 @@ using zip_t = typename zip<T1,T2>::type;
 // *********************
 // *      unzip_t      *
 // *********************
-
 template<typename T>
 requires ( is_tuple<T> )
 using unzip_t = typename impl::unzip<T>::type;
-
 
 } // namespace tuple_ext

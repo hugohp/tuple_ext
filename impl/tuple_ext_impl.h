@@ -14,6 +14,7 @@ namespace impl
   struct is_tuple<std::tuple<Ts...>> : std::true_type {};
 }
 
+
 // *********************
 // *     concepts      *
 // *********************
@@ -23,10 +24,10 @@ concept is_tuple = impl::is_tuple<T>::value;
 template<typename... Ts>
 concept are_tuple = ( is_tuple<Ts> && ... );
 
+
 // *********************
 // *     concat_t      *
 // *********************
-
 template<typename...Ts>
 requires ( are_tuple<Ts...> )
 using concat_t = decltype(std::tuple_cat(std::declval<Ts>()...));
@@ -34,10 +35,10 @@ using concat_t = decltype(std::tuple_cat(std::declval<Ts>()...));
 namespace impl
 {
 
+
 // *********************
 // *        head       *
 // *********************
-
 template<typename T> struct head;
 
 template<typename T,typename... Ts>
@@ -46,11 +47,10 @@ struct head<std::tuple<T,Ts...>>
   using type = T;
 };
 
+
 // *********************
 // *       tail        *
 // *********************
-
-
 template<typename T> struct tail;
 
 template<typename T,typename... Ts>
@@ -63,8 +63,6 @@ struct tail<std::tuple<T,Ts...>>
 // *********************
 // *     has_type      *
 // *********************
-
-
 template<typename T, typename... Ts>
 struct has_type
 {
@@ -75,7 +73,6 @@ struct has_type
 // *********************
 // *     reverse       *
 // *********************
-
 template<typename T> struct reverse;
 
 template<typename... Ts>
@@ -90,11 +87,10 @@ struct reverse<std::tuple<T,Ts...>>
   using type = concat_t<typename reverse<std::tuple<Ts...>>::type, std::tuple<T>>;
 };
 
+
 // *********************
 // *       unique      *
 // *********************
-
-
 template<typename T> struct runique;
 
 template<typename... Ts>
@@ -132,7 +128,6 @@ struct unique<std::tuple<Ts...>>
 // *********************
 // *     remove        *
 // *********************
-
 template<typename ... T1s>
 struct remove
 {
@@ -154,7 +149,6 @@ struct remove
 // *********************
 // *       inter       *
 // *********************
-
 template<typename ... T1s>
 struct inter
 {
@@ -176,7 +170,6 @@ struct inter
 // *********************
 // *       zip         *
 // *********************
-
 template<typename ... T1s>
 struct zip
 {
@@ -193,7 +186,6 @@ struct zip
 // *********************
 // *       unzip       *
 // *********************
-
 // is_pair_v / are_pairs_v
 template<typename T>
 struct is_pair : std::false_type {};
