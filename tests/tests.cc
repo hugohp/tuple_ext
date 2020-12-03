@@ -274,5 +274,33 @@ struct tuple_testing
       >
     );
   };
+
+  struct zip_tests {
+
+    // zip [t0,t1] [t2,t3]  = [(t0,t2),(t1,t3)]
+    static_assert (
+      is_same_v<
+        zip_t<
+          tuple<t0,t1>,
+          tuple<t2,t3>
+        >,
+        tuple<pair<t0,t2>,pair<t1,t3>>
+      >
+    );
+ };
+
+  struct unzip_tests {
+
+    // unzip [(t0,t2),(t1,t3)] = ([t0,t1],[t2,t3])
+    static_assert (
+      is_same_v<
+        unzip_t<
+          tuple<pair<t0,t2>,pair<t1,t3>>
+        >,
+        pair<tuple<t0,t1>,tuple<t2,t3>>
+      >
+    );
+ };
+
 };
 
