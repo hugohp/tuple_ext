@@ -8,14 +8,28 @@ namespace tuple_ext{
 namespace impl
 {
   template<typename T>
-  struct false_type : std::false_type {};
+  struct is_tuple : std::false_type {};
+
+  template<typename... Ts>
+  struct is_tuple<std::tuple<Ts...>> : std::true_type {};
 }
+
+// *********************
+// *     concepts      *
+// *********************
+
+template<typename T>
+concept is_tuple = impl::is_tuple<T>::value;
+
+template<typename... Ts>
+concept are_tuple = ( is_tuple<Ts> && ... );
 
 // *********************
 // *     concat_t      *
 // *********************
 
 template<typename...Ts>
+requires ( are_tuple<Ts...> )
 using concat_t = decltype(std::tuple_cat(std::declval<Ts>()...));
 
 // *********************
@@ -26,19 +40,6 @@ namespace impl
 {
   template<typename T> struct head;
 
-  template<typename T>
-  struct head
-  {
-    static_assert (impl::false_type<T>::value,"tuple_ext: head only takes tuple as template parameter");
-  };
-
-  template<typename... Ts>
-  struct head<std::tuple<Ts...>>
-  {
-    static_assert (impl::false_type<Ts...>::value,"tuple_ext: head cannot take empty tuple");
-  };
-
-
   template<typename T,typename... Ts>
   struct head<std::tuple<T,Ts...>>
   {
@@ -47,6 +48,7 @@ namespace impl
 }
 
 template<typename T>
+requires ( is_tuple<T> && (std::tuple_size_v<T> != 0) )
 using head_t = typename impl::head<T>::type;
 
 // *********************
@@ -57,18 +59,6 @@ namespace impl
 {
   template<typename T> struct tail;
 
-  template<typename T>
-  struct tail
-  {
-    static_assert (impl::false_type<T>::value,"tuple_ext: tail only takes tuple as template parameter");
-  };
-
-  template<typename... Ts>
-  struct tail<std::tuple<Ts...>>
-  {
-    static_assert (impl::false_type<Ts...>::value,"tuple_ext: tail cannot take empty tuple");
-  };
-
   template<typename T,typename... Ts>
   struct tail<std::tuple<T,Ts...>>
   {
@@ -78,6 +68,7 @@ namespace impl
 
 
 template<typename T>
+requires is_tuple<T>
 using tail_t = typename impl::tail<T>::type;
 
 // *********************
@@ -95,12 +86,6 @@ namespace impl
 
 template<typename T,typename Tp> struct has_type;
 
-template<typename T, typename Tp>
-struct has_type
-{
-  static_assert (impl::false_type<T>::value,"tuple_ext: has_type only takes tuple as second template parameter");
-};
-
 template<typename T,typename... Ts>
 struct has_type<T,std::tuple<Ts...>>
 {
@@ -108,6 +93,7 @@ struct has_type<T,std::tuple<Ts...>>
 };
 
 template<typename T,typename Tp>
+requires ( is_tuple<Tp> )
 inline constexpr bool has_type_v = has_type<T, Tp>::value;
 
 // *********************
@@ -130,12 +116,6 @@ namespace impl
 
 template<typename T> struct reverse;
 
-template<typename T>
-struct reverse
-{
-  static_assert (impl::false_type<T>::value,"tuple_ext: reverse only takes tuple as template parameter");
-};
-
 template<typename... Ts>
 struct reverse<std::tuple<Ts...>>
 {
@@ -144,6 +124,7 @@ struct reverse<std::tuple<Ts...>>
 
 
 template<typename T>
+requires ( is_tuple<T> )
 using reverse_t = typename reverse<T>::type;
 
 // *********************
@@ -188,12 +169,6 @@ namespace impl
 
 template<typename T> struct unique;
 
-template<typename T>
-struct unique
-{
-  static_assert (impl::false_type<T>::value,"tuple_ext: unique only takes tuple as template parameter");
-};
-
 template<typename... Ts>
 struct unique<std::tuple<Ts...>>
 {
@@ -201,6 +176,7 @@ struct unique<std::tuple<Ts...>>
 };
 
 template<typename T>
+requires ( is_tuple<T> )
 using unique_t = typename impl::unique<T>::type;
 
 
@@ -229,12 +205,6 @@ namespace impl
 
 template<typename T1,typename T2> struct remove;
 
-template<typename T1,typename T2>
-struct remove
-{
-  static_assert (impl::false_type<T1>::value,"tuple_ext: remove only takes tuples as template parameters");
-};
-
 template<typename ...T1s,typename... T2s>
 struct remove<std::tuple<T1s...>,std::tuple<T2s...>>
 {
@@ -242,6 +212,7 @@ struct remove<std::tuple<T1s...>,std::tuple<T2s...>>
 };
 
 template<typename T1,typename T2>
+requires ( is_tuple<T1> && is_tuple<T2> )
 using remove_t = typename remove<T1,T2>::type;
 
 // *********************
@@ -269,12 +240,6 @@ namespace impl
 
 template<typename T1,typename T2> struct inter;
 
-template<typename T1,typename T2>
-struct inter
-{
-  static_assert (impl::false_type<T1>::value,"tuple_ext: inter only takes tuples as template parameters");
-};
-
 template<typename... T1s,typename... T2s>
 struct inter<std::tuple<T1s...>,std::tuple<T2s...>>
 {
@@ -282,6 +247,7 @@ struct inter<std::tuple<T1s...>,std::tuple<T2s...>>
 };
 
 template<typename T1,typename T2>
+requires ( is_tuple<T1> && is_tuple<T2> )
 using inter_t = typename inter<T1,T2>::type;
 
 // *********************
@@ -304,12 +270,6 @@ namespace impl
 
 template<typename T1,typename T2> struct zip;
 
-template<typename T1,typename T2>
-struct zip
-{
-  static_assert (impl::false_type<T1>::value,"tuple_ext: zip only takes tuples as template parameters");
-};
-
 template<typename... T1s,typename... T2s>
 struct zip<std::tuple<T1s...>,std::tuple<T2s...>>
 {
@@ -317,6 +277,7 @@ struct zip<std::tuple<T1s...>,std::tuple<T2s...>>
 };
 
 template<typename T1,typename T2>
+requires ( is_tuple<T1> && is_tuple<T2> )
 using zip_t = typename zip<T1,T2>::type;
 
 
@@ -375,12 +336,6 @@ namespace impl
 
 template<typename T> struct unzip;
 
-template<typename T>
-struct unzip
-{
-  static_assert (impl::false_type<T>::value,"tuple_ext: unzip only takes tuples as template parameters");
-};
-
 template<typename... Ts>
 struct unzip<std::tuple<Ts...>>
 {
@@ -388,6 +343,7 @@ struct unzip<std::tuple<Ts...>>
 };
 
 template<typename T>
+requires ( is_tuple<T> )
 using unzip_t = typename unzip<T>::type;
 
 
