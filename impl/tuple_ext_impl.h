@@ -231,6 +231,7 @@ struct unzip<std::tuple<Ts...>>
   >;
 };
 
+
 // *********************
 // *       map         *
 // *********************
@@ -241,6 +242,7 @@ struct map<F,std::tuple<Ts...>>
 {
   using type = std::tuple<typename F<Ts>::type...>;
 };
+
 
 // *********************
 // *       foldr       *
@@ -271,6 +273,7 @@ struct foldr<F,TY,std::tuple<X,TXs...>>
     typename foldr<F,TY,std::tuple<TXs...>>::type
   >::type;
 };
+
 
 // *********************
 // *       foldl       *

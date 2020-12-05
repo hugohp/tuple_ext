@@ -2,7 +2,7 @@
 
 Extentions to *std::tuple* using type-level functions.
 
-Noticing *std::tuple* is similar to a Haskell list - but of types instead of values - we implement some Haskell-like prelude functions: head, tail, reverse, map, foldl, foldr and more.
+The *std::tuple* is similar to a Haskell list, but of types instead of values. This library implements some Haskell-like prelude functions to be used with *std::tuple*s: head, tail, reverse, map, foldl, foldr and more.
 
 ## Examples
 ```
