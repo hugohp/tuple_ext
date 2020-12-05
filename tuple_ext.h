@@ -127,4 +127,28 @@ requires ( is_tuple<Tp> )
 using map_t = typename impl::map<F,Tp>::type;
 
 
+// *********************
+// *     foldr_t       *
+// *********************
+template<
+  template<typename,typename> typename F, // F(TX,TY)
+  typename TY,
+  typename TXs
+>
+requires ( is_tuple<TXs> )
+using foldr_t = typename impl::foldr<F,TY,TXs>::type;
+
+// *********************
+// *     foldl_t       *
+// *********************
+template<
+  template<typename,typename> typename F, // F(TX,TY)
+  typename TY,
+  typename TXs
+>
+requires ( is_tuple<TXs> )
+using foldl_t = typename impl::foldl<F,TY,TXs>::type;
+
+
+
 } // namespace tuple_ext

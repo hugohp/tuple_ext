@@ -1,11 +1,13 @@
 # tuple_ext
 
-Extentions to *std::tuple* partially inspired on Andrei Alexandresku's typelists, but for C++20.
+Extentions to *std::tuple* using type-level functions.
 
-Noticing *std::tuple* is similar to a Haskell list, here we implement some Haskell-like prelude functions e.g. concat, head, tail, map.
+Noticing *std::tuple* is similar to a Haskell list - but of types instead of values - we implement some Haskell-like prelude functions: head, tail, reverse, map, foldl, foldr and more.
 
 ## Examples
 ```
+  #include "tuple_ext.h"
+
   using namespace std;
   using namespace tuple_ext;
 
@@ -14,9 +16,6 @@ Noticing *std::tuple* is similar to a Haskell list, here we implement some Haske
   using one_t   = std::integral_constant<unsigned int, 1>;
   using two_t   = std::integral_constant<unsigned int, 2>;
   using three_t = std::integral_constant<unsigned int, 3>;
-  using four_t  = std::integral_constant<unsigned int, 4>;
-  using five_t  = std::integral_constant<unsigned int, 5>;
-  using six_t   = std::integral_constant<unsigned int, 6>;
 
   // concat [0,1] [2,3] = [0,1,2,3]
   using concat_result_t = concat_t<
@@ -48,13 +47,31 @@ Noticing *std::tuple* is similar to a Haskell list, here we implement some Haske
   // unzip [(0,2),(1,3)] = ([0,1],[2,3])
   using unzip_result_t = unzip_t< tuple<pair<zero_t,two_t>,pair<one_t,three_t>> >;
 
-  // f(x) = x + 1 
-  template<typename T>
-  struct add_one_t { 
-    using value_type = std::remove_cv_t<decltype(T::value)>;
-    using type = std::integral_constant<value_type,T::value + 1>;
+  // f(x,y) = x + y
+  template<typename X,typename Y>
+  struct sum {
+    using value_type = std::remove_cv_t<decltype(X::value)>;
+    using type = std::integral_constant<value_type,X::value + Y::value>;
   };
 
-  // map f [0,1,2] = [1,2,3]
-  using map_result_t = map_t< add_one_t, std::tuple<zero_t,one_t,two_t> >;
+  // f(x) = 1 + x;
+  template<typename X>
+  struct add_one : sum<X,one_t>{};
+
+  // map f [0,1,2] = [1,2,3] where f(x) = 1 + x
+  using map_result_t = map_t< add_one, std::tuple<zero_t,one_t,two_t> >;
+
+  // foldr f 0 [1,2,3] = 6 where f(x,y) = x + y
+  using foldr_result_type = foldr_t<
+    sum,
+    zero_t,
+    std::tuple<one_t,two_t,three_t>
+  >;
+
+  // foldl f 0 [1,2,3] = 6 where f(x,y) = x + y
+  using foldl_result_type = foldl_t<
+    sum,
+    zero_t,
+    std::tuple<one_t,two_t,three_t>
+  >;
 ```

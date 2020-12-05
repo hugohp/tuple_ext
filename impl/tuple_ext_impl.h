@@ -9,7 +9,7 @@ namespace impl
 {
   template<typename T>
   struct is_tuple : std::false_type {};
-  
+
   template<typename... Ts>
   struct is_tuple<std::tuple<Ts...>> : std::true_type {};
 }
@@ -232,6 +232,66 @@ struct map<F,std::tuple<Ts...>>
   using type = std::tuple<typename F<Ts>::type...>;
 };
 
+// *********************
+// *       foldr       *
+// *********************
+template<template<typename,typename> typename F, typename TY, typename TXs> struct foldr;
+
+// foldr f x [] = x
+template<
+  template<typename,typename> typename F,
+  typename TY,
+  typename... TXs
+>
+struct foldr<F,TY,std::tuple<TXs...>>
+{
+  using type = TY;
+};
+
+// foldr f x (y:ys) = f x foldr f x ys
+template<
+  template<typename,typename> typename F, // F(X,TY)
+  typename TY,
+  typename X, typename... TXs
+>
+struct foldr<F,TY,std::tuple<X,TXs...>>
+{
+  using type = typename F<
+    X,
+    typename foldr<F,TY,std::tuple<TXs...>>::type
+  >::type;
+};
+
+// *********************
+// *       foldl       *
+// *********************
+template<template<typename,typename> typename F, typename TY, typename TXs> struct foldl;
+
+// foldl f x [] = x
+template<
+  template<typename,typename> typename F,
+  typename TY,
+  typename... TXs
+>
+struct foldl<F,TY,std::tuple<TXs...>>
+{
+  using type = TY;
+};
+
+// foldl f x (y:ys) = f x foldl f x ys
+template<
+  template<typename,typename> typename F, // F(X,TY)
+  typename TY,
+  typename X, typename... TXs
+>
+struct foldl<F,TY,std::tuple<X,TXs...>>
+{
+  using type = typename foldl<
+    F,
+    typename F<X,TY>::type,
+    std::tuple<TXs...>
+  >::type;
+};
 
 } // namespace impl
 } // namespace tuple_ext

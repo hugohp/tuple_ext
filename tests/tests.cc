@@ -5,6 +5,16 @@
 using namespace tuple_ext;
 using namespace std;
 
+template<typename X,typename Y>
+  concept is_same_value = 
+    std::is_same_v<
+      std::remove_cv_t<decltype(X::value)>,
+      std::remove_cv_t<decltype(Y::value)>
+    >;
+
+
+
+
 struct tuple_testing
 {
   // Some types
@@ -12,9 +22,6 @@ struct tuple_testing
   using one_t = std::integral_constant<unsigned int, 1>;
   using two_t = std::integral_constant<unsigned int, 2>;
   using three_t = std::integral_constant<unsigned int, 3>;
-  using four_t = std::integral_constant<unsigned int, 4>;
-  using five_t = std::integral_constant<unsigned int, 5>;
-  using six_t = std::integral_constant<unsigned int, 6>;
 
   struct tuple_cat_tests {
 
@@ -303,24 +310,61 @@ struct tuple_testing
     );
   };
 
+  // f(x,y) = x+y
+  template<typename X,typename Y>
+  requires ( is_same_value<X,Y> )
+  struct sum {
+    using value_type = std::remove_cv_t<decltype(X::value)>;
+    using type = std::integral_constant<value_type,X::value + Y::value>;
+  };
+
+  // f(x) = 1 + x;
+  template<typename X>
+  struct add_one : sum<X,one_t>{};
+
   struct map_tests {
 
-    template<typename T>
-    struct add_one_t {
-      using value_type = std::remove_cv_t<decltype(T::value)>;
-      using type = std::integral_constant<value_type,T::value + 1>;
-    };
-
-    // map f [0,1,2] = [1,2,3] where f(x)=x+1
+    // map f [0,1,2] = [1,2,3] where f(x) = 1 + x
     static_assert (
       is_same_v<
         map_t<
-          add_one_t,
+          add_one,
           std::tuple<zero_t,one_t,two_t>
         >,
         std::tuple<one_t,two_t,three_t>
       >
     );
   };
+
+  struct foldr_tests {
+
+    // foldr f 0 [1,2,3] = 6 where f(x,y) = x + y
+    static_assert (
+      is_same_v<
+        foldr_t<
+          sum,
+          zero_t,
+          std::tuple<one_t,two_t,three_t>
+        >,
+        std::integral_constant<unsigned int, 6>
+      >
+    );
+  };
+
+  struct foldl_tests {
+
+    // foldl f 0 [1,2,3] = 6 where f(x,y) = x + y
+    static_assert (
+      is_same_v<
+        foldl_t<
+          sum,
+          zero_t,
+          std::tuple<one_t,two_t,three_t>
+        >,
+        std::integral_constant<unsigned int, 6>
+      >
+    );
+  };
+
 };
 
