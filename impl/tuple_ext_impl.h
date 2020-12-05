@@ -63,8 +63,10 @@ struct tail<std::tuple<T,Ts...>>
 // *********************
 // *     has_type      *
 // *********************
+template<typename T, typename Tp> struct has_type;
+
 template<typename T, typename... Ts>
-struct has_type
+struct has_type<T,std::tuple<Ts...>>
 {
   static constexpr bool value = (std::is_same<T,Ts>::value || ...);
 };
@@ -104,7 +106,7 @@ struct runique<std::tuple<T,Ts...>>
 {
   using type = concat_t<
     std::conditional_t<
-      impl::has_type<T,Ts...>::value,
+      impl::has_type<T,std::tuple<Ts...>>::value,
       std::tuple<>,
       std::tuple<T>
     >,
@@ -128,60 +130,68 @@ struct unique<std::tuple<Ts...>>
 // *********************
 // *     remove        *
 // *********************
+template<typename Tp> struct remove;
+
 template<typename ... T1s>
-struct remove
+struct remove<std::tuple<T1s...>>
 {
+  template<typename Tp> struct from;
+
   template<typename... T2s>
-  struct from
+  struct from<std::tuple<T2s...>>
   {
     using type = concat_t<
       typename std::conditional<
-        impl::has_type<T2s,T1s...>::value,
+        impl::has_type<T2s,std::tuple<T1s...>>::value,
         std::tuple<>,
         std::tuple<T2s>
       >::type...
     >;
   };
-
 };
 
 
 // *********************
 // *       inter       *
 // *********************
+template<typename Tp> struct inter;
+
 template<typename ... T1s>
-struct inter
+struct inter<std::tuple<T1s...>>
 {
+  template<typename Tp> struct with;
+
   template<typename... T2s>
-  struct with
+  struct with<std::tuple<T2s...>>
   {
     using type = concat_t<
       typename std::conditional<
-        impl::has_type<T1s,T2s...>::value,
+        impl::has_type<T1s,std::tuple<T2s...>>::value,
         std::tuple<T1s>,
         std::tuple<>
       >::type...
     >;
   };
-
 };
 
 
 // *********************
 // *       zip         *
 // *********************
-template<typename ... T1s>
-struct zip
+
+template<typename T1> struct zip;
+
+template<typename... T1s>
+struct zip<std::tuple<T1s...>>
 {
+  template<typename T2> struct with;
+
   template<typename... T2s>
-  struct with
+  struct with<std::tuple<T2s...>>
   {
-    using type = std::tuple<
-      std::pair<T1s,T2s>...
-    >;
+    using type = std::tuple<std::pair<T1s,T2s>... >;
   };
 };
-
 
 // *********************
 // *       fst         *
