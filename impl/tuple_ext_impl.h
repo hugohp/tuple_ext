@@ -245,6 +245,43 @@ struct map<F,std::tuple<Ts...>>
 
 
 // *********************
+// *      filter       *
+// *********************
+template<template<typename T> typename F, typename Tp> struct filter;
+
+template<
+  template<typename> typename F,
+  typename... Ts>
+struct filter<F,std::tuple<Ts...>>
+{
+  using type = std::tuple<>;
+};
+
+
+// filter f (x:xs) | f x       = x : filter p xs
+//                   otherwise = filter p xs
+template<
+  template<typename> typename F,
+   typename T,
+   typename... Ts>
+struct filter<F,std::tuple<T,Ts...>>
+{
+  using type = concat_t<
+    std::conditional_t<
+      F<T>::value,
+      std::tuple<T>,
+      std::tuple<>
+    >,
+    typename filter<
+      F,
+      std::tuple<Ts...>
+    >::type
+  >;
+};
+
+
+
+// *********************
 // *       foldr       *
 // *********************
 template<template<typename,typename> typename F, typename TY, typename TXs> struct foldr;

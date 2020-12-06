@@ -1,4 +1,5 @@
 #include "tuple_ext.h"
+#include <functional>
 #include <tuple>
 #include <type_traits>
 
@@ -6,14 +7,11 @@ using namespace tuple_ext;
 using namespace std;
 
 template<typename X,typename Y>
-  concept is_same_value = 
+  concept is_same_prim_type =
     std::is_same_v<
       std::remove_cv_t<decltype(X::value)>,
       std::remove_cv_t<decltype(Y::value)>
     >;
-
-
-
 
 struct tuple_testing
 {
@@ -22,6 +20,7 @@ struct tuple_testing
   using one_t = std::integral_constant<unsigned int, 1>;
   using two_t = std::integral_constant<unsigned int, 2>;
   using three_t = std::integral_constant<unsigned int, 3>;
+  using four_t = std::integral_constant<unsigned int, 4>;
 
   struct tuple_cat_tests {
 
@@ -59,8 +58,6 @@ struct tuple_testing
     );
   };
 
-
-
   struct head_tests {
 
     // head [zero_t,one_t,two_t] = zero_t
@@ -80,8 +77,6 @@ struct tuple_testing
     );
 
   };
-
-
 
   struct tail_tests {
 
@@ -103,8 +98,6 @@ struct tuple_testing
 
   };
 
-
-
   struct has_type_tests {
 
     static_assert ( has_type_v< zero_t, tuple<one_t,two_t,zero_t> > );
@@ -112,7 +105,6 @@ struct tuple_testing
     static_assert ( ! has_type_v< zero_t ,tuple<> > );
 
   };
-
 
   struct reverse_tests {
 
@@ -312,7 +304,7 @@ struct tuple_testing
 
   // f(x,y) = x+y
   template<typename X,typename Y>
-  requires ( is_same_value<X,Y> )
+  requires ( is_same_prim_type<X,Y> )
   struct sum {
     using value_type = std::remove_cv_t<decltype(X::value)>;
     using type = std::integral_constant<value_type,X::value + Y::value>;
@@ -332,6 +324,51 @@ struct tuple_testing
           std::tuple<zero_t,one_t,two_t>
         >,
         std::tuple<one_t,two_t,three_t>
+      >
+    );
+  };
+
+  struct filter_tests {
+
+    // f(x) = true if x is even, otherwiuse false
+    template<typename X>
+    struct is_even {
+      static constexpr bool value = (std::modulus()(X::value,2) == 0);
+    };
+
+    // filter f [0,1,2,3,4] = [0,2,4] where f(x) = true if x is even, otherwise false
+    static_assert (
+      is_same_v<
+        filter_t<
+          is_even,
+          std::tuple<zero_t,one_t,two_t,three_t,four_t>
+        >,
+        std::tuple<zero_t,two_t,four_t>
+      >
+    );
+
+    // filter f [] = []
+    static_assert (
+      is_same_v<
+        filter_t<
+          is_even,
+          std::tuple<>
+        >,
+        std::tuple<>
+      >
+    );
+
+    template<typename X>
+    struct always_false : std::false_type {};
+
+    // filter f [] = [] where f(x) = false;
+    static_assert (
+      is_same_v<
+        filter_t<
+          always_false,
+          std::tuple<zero_t,one_t,two_t,three_t,four_t>
+        >,
+        std::tuple<>
       >
     );
   };

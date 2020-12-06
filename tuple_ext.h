@@ -88,6 +88,14 @@ using unzip_t = typename impl::unzip<T>::type;
 
 
 // *********************
+// *     filter_t      *
+// *********************
+template<template<typename T> typename F, typename Tp>
+requires ( is_tuple<Tp> )
+using filter_t = typename impl::filter<F,Tp>::type;
+
+
+// *********************
 // *      map_t        *
 // *********************
 template<template<typename T> typename F, typename Tp>
