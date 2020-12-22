@@ -1,6 +1,6 @@
 # tuple_ext
 
-Extentions to *std::tuple* using type-level functions.
+Extensions to *std::tuple* using type-level functions.
 
 The *std::tuple* is similar to a Haskell list, but of types instead of values. This library implements some Haskell-like prelude functions to be used with *std::tuple*s: head, tail, reverse, map, foldl, foldr and more.
 
