@@ -1,2 +1,1 @@
-# tuple_ext
-Extensions to std::tuple using type-level functions.
+This project has been moved to https://codeberg.org/hugohp/tuple_ext
